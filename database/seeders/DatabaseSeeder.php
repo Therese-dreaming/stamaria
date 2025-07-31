@@ -18,10 +18,21 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'role' => 'user',
         ]);
 
-        $this->call([
-            ServiceSeeder::class,
+        // Create a default admin user
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+        ]);
+
+        // Create a default staff user
+        User::factory()->create([
+            'name' => 'Staff User',
+            'email' => 'staff@example.com',
+            'role' => 'staff',
         ]);
     }
 }

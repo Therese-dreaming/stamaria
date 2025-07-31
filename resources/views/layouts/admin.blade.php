@@ -127,6 +127,13 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('admin.priests.index') }}" 
+                           class="flex items-center px-4 py-3 text-gray-700 rounded-lg {{ request()->routeIs('admin.priests.*') ? 'bg-primary-light text-primary font-medium' : 'hover:bg-gray-100' }}">
+                            <i class="fas fa-user-tie w-5 h-5 text-center"></i>
+                            <span class="ml-3 text-sm">Priests</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('admin.settings') }}" 
                            class="flex items-center px-4 py-3 text-gray-700 rounded-lg {{ request()->routeIs('admin.settings') ? 'bg-primary-light text-primary font-medium' : 'hover:bg-gray-100' }}">
                             <i class="fas fa-cog w-5 h-5 text-center"></i>
@@ -143,31 +150,10 @@
                 @yield('header')
             </div>
             
+            <!-- Toast Container -->
+            <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+            
             <div class="px-6 pb-8">
-                @if (session('success'))
-                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
-                        <div class="flex">
-                            <div class="py-1"><i class="fas fa-check-circle text-green-500 mr-3"></i></div>
-                            <div>{{ session('success') }}</div>
-                            <button type="button" class="ml-auto" onclick="this.parentElement.parentElement.remove()">
-                                <i class="fas fa-times text-green-500"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
-                        <div class="flex">
-                            <div class="py-1"><i class="fas fa-exclamation-circle text-red-500 mr-3"></i></div>
-                            <div>{{ session('error') }}</div>
-                            <button type="button" class="ml-auto" onclick="this.parentElement.parentElement.remove()">
-                                <i class="fas fa-times text-red-500"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
-
                 @yield('content')
             </div>
         </main>
@@ -177,6 +163,84 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
     <script>
+        // Toast Notification System
+        function showToast(message, type = 'success', duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `${colors[type]} px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out opacity-0 translate-x-full max-w-sm`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="${icons[type]} mr-3 text-lg"></i>
+                        <span class="font-medium">${message}</span>
+                    </div>
+                    <button onclick="removeToast('${toastId}')" class="ml-4 text-white hover:text-gray-200 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-x-full');
+                toast.classList.add('opacity-100', 'translate-x-0');
+            }, 100);
+            
+            // Auto remove
+            if (duration > 0) {
+                setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+            }
+        }
+        
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('opacity-100', 'translate-x-0');
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+        
+        // Show session messages as toasts
+        @if(session('success'))
+            showToast('{{ addslashes(session('success')) }}', 'success');
+        @endif
+        
+        @if(session('error'))
+            showToast('{{ addslashes(session('error')) }}', 'error');
+        @endif
+        
+        @if(session('warning'))
+            showToast('{{ addslashes(session('warning')) }}', 'warning');
+        @endif
+        
+        @if(session('info'))
+            showToast('{{ addslashes(session('info')) }}', 'info');
+        @endif
+        
         // Mobile sidebar toggle
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');

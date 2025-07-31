@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            $table->integer('duration_minutes')->nullable()->after('price');
-            $table->json('schedules')->nullable()->after('requirements');
+            $table->integer('slots')->default(1)->after('duration_minutes');
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn(['duration_minutes', 'schedules']);
+            $table->dropColumn('slots');
         });
     }
-};
+}; 

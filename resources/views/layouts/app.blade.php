@@ -9,6 +9,8 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
         body {
@@ -48,25 +50,10 @@
             </div>
         </nav>
 
+        <!-- Toast Container -->
+        <div id="toast-container" class="position-fixed" style="top: 20px; right: 20px; z-index: 1050;"></div>
+        
         <main class="py-4">
-            @if (session('success'))
-                <div class="container">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="container">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </div>
-            @endif
-
             @yield('content')
         </main>
     </div>
@@ -111,5 +98,75 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'success', duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const colors = {
+                success: 'alert-success',
+                error: 'alert-danger',
+                warning: 'alert-warning',
+                info: 'alert-info'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `alert ${colors[type]} alert-dismissible fade show mb-2`;
+            toast.style.maxWidth = '350px';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="${icons[type]} me-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="removeToast('${toastId}')"></button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove
+            if (duration > 0) {
+                setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+            }
+        }
+        
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 150);
+            }
+        }
+        
+        // Show session messages as toasts
+        @if(session('success'))
+            showToast('{{ addslashes(session('success')) }}', 'success');
+        @endif
+        
+        @if(session('error'))
+            showToast('{{ addslashes(session('error')) }}', 'error');
+        @endif
+        
+        @if(session('warning'))
+            showToast('{{ addslashes(session('warning')) }}', 'warning');
+        @endif
+        
+        @if(session('info'))
+            showToast('{{ addslashes(session('info')) }}', 'info');
+        @endif
+    </script>
 </body>
 </html>

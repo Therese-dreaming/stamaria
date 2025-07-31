@@ -18,15 +18,15 @@ class Service extends Model
         'price',
         'icon',
         'duration_minutes',
+        'slots',
         'additional_notes',
-        'types',
         'schedules',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'duration_minutes' => 'integer',
-        'types' => 'array',
+        'slots' => 'integer',
         'schedules' => 'array',
     ];
 
@@ -66,6 +66,38 @@ class Service extends Model
         } else {
             return "{$minutes}m";
         }
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * Get the form fields for this service
+     */
+    public function formFields()
+    {
+        return $this->hasMany(ServiceFormField::class)->orderBy('order');
+    }
+
+    /**
+     * Get required form fields
+     */
+    public function requiredFormFields()
+    {
+        return $this->formFields()->where('required', true);
+    }
+
+    /**
+     * Get conditional form fields
+     */
+    public function conditionalFormFields()
+    {
+        return $this->formFields()->where('is_conditional', true);
     }
 
 }

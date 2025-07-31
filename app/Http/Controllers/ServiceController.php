@@ -12,7 +12,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::active()->orderBy('name')->get();
+        $services = Service::orderBy('name')->get();
         return view('services', compact('services'));
     }
 
@@ -30,6 +30,6 @@ class ServiceController extends Controller
             return redirect()->route('services')->with('error', 'Service not found.');
         }
         
-        return view('services.book', compact('service', 'understood'));
+        return view('booking.step1-booking', compact('service', 'understood'));
     }
 }

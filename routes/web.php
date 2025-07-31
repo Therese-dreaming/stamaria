@@ -6,6 +6,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PriestController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
@@ -58,10 +59,22 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Booking step 1
+Route::get('/booking/step1/{service}', [App\Http\Controllers\BookingController::class, 'step1'])->middleware(['auth', 'verified'])->name('booking.step1');
+
+// Booking step 2
+Route::post('/booking/step2', [App\Http\Controllers\BookingController::class, 'step2'])->middleware(['auth', 'verified'])->name('booking.step2');
+
+// Booking step 3
+Route::post('/booking/step3', [App\Http\Controllers\BookingController::class, 'step3'])->middleware(['auth', 'verified'])->name('booking.step3');
+
 // Admin routes
-Route::prefix('admin')->middleware(['auth', 'verified'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Services management
+    Route::resource('services', App\Http\Controllers\ServiceController::class);
+    
     Route::get('/services', [AdminController::class, 'services'])->name('services');
     Route::get('/services/create', [AdminController::class, 'createService'])->name('services.create');
     Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');
@@ -69,5 +82,21 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->name('admin.')->group(
     Route::get('/services/{service}/edit', [AdminController::class, 'editService'])->name('services.edit');
     Route::put('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
     Route::delete('/services/{service}', [AdminController::class, 'destroyService'])->name('services.destroy');
-    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    
+    // Service form fields management
+    Route::get('/services/{service}/form-fields', [App\Http\Controllers\ServiceFormFieldController::class, 'index'])->name('services.form-fields');
+    Route::post('/services/{service}/form-fields', [App\Http\Controllers\ServiceFormFieldController::class, 'store'])->name('services.form-fields.store');
+    Route::put('/services/{service}/form-fields/{formField}', [App\Http\Controllers\ServiceFormFieldController::class, 'update'])->name('services.form-fields.update');
+    Route::delete('/services/{service}/form-fields/{formField}', [App\Http\Controllers\ServiceFormFieldController::class, 'destroy'])->name('services.form-fields.destroy');
+    
+    // Users management
+    Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('users');
+    Route::get('/users/{user}/edit', [App\Http\Controllers\AdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{user}', [App\Http\Controllers\AdminController::class, 'updateUser'])->name('users.update');
+    
+    // Priests management
+    Route::resource('priests', App\Http\Controllers\PriestController::class);
+    
+    // Settings
+    Route::get('/settings', [App\Http\Controllers\AdminController::class, 'settings'])->name('settings');
 });

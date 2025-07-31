@@ -122,6 +122,9 @@
         </div>
     </nav>
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
     <!-- Main Content -->
     <main class="">
         @yield('content')
@@ -167,6 +170,84 @@
     @stack('scripts')
     
     <script>
+        // Toast Notification System
+        function showToast(message, type = 'success', duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `${colors[type]} px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out opacity-0 translate-x-full max-w-sm`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="${icons[type]} mr-3 text-lg"></i>
+                        <span class="font-medium">${message}</span>
+                    </div>
+                    <button onclick="removeToast('${toastId}')" class="ml-4 text-white hover:text-gray-200 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-x-full');
+                toast.classList.add('opacity-100', 'translate-x-0');
+            }, 100);
+            
+            // Auto remove
+            if (duration > 0) {
+                setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+            }
+        }
+        
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('opacity-100', 'translate-x-0');
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+        
+        // Show session messages as toasts
+        @if(session('success'))
+            showToast('{{ addslashes(session('success')) }}', 'success');
+        @endif
+        
+        @if(session('error'))
+            showToast('{{ addslashes(session('error')) }}', 'error');
+        @endif
+        
+        @if(session('warning'))
+            showToast('{{ addslashes(session('warning')) }}', 'warning');
+        @endif
+        
+        @if(session('info'))
+            showToast('{{ addslashes(session('info')) }}', 'info');
+        @endif
+        
         // Mobile menu toggle
         document.getElementById('mobile-menu-button').addEventListener('click', function() {
             const mobileMenu = document.getElementById('mobile-menu');

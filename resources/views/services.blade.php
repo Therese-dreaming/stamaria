@@ -24,25 +24,39 @@
                     </div>
                     <h3 class="text-2xl font-bold mb-3">{{ $service->name }}</h3>
                     <p class="text-gray-600 mb-4">{{ $service->description }}</p>
-                    
-                    <!-- Price and Duration -->
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex flex-col">
-                            <span class="text-2xl font-bold text-[#0d5c2f]">
-                                @if($service->price > 0)
-                                    {{ $service->formatted_price }}
-                                @else
-                                    <span class="text-green-600">Free</span>
-                                @endif
-                            </span>
-                            @if($service->formatted_duration)
-                                <span class="text-sm text-gray-500">Duration: {{ $service->formatted_duration }}</span>
-                            @endif
+                    <!-- Types or Price/Duration -->
+                    @if(is_array($service->types) && count($service->types) > 0)
+                        <div class="mb-4">
+                            <div class="font-semibold text-gray-700 mb-1">Types:</div>
+                            <ul class="space-y-1">
+                                @foreach($service->types as $type)
+                                    <li class="flex justify-between items-center font-bold">
+                                        <span>{{ is_array($type) ? ($type['name'] ?? $type[0] ?? '') : $type }}</span>
+                                        @if(is_array($type) && isset($type['price']))
+                                            <span class="text-[#0d5c2f] font-bold">₱{{ number_format($type['price'], 2) }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
                         </div>
-                    </div>
-                    
+                    @else
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex flex-col">
+                                <span class="text-2xl font-bold text-[#0d5c2f]">
+                                    @if($service->price > 0)
+                                        {{ $service->formatted_price }}
+                                    @else
+                                        <span class="text-green-600">Free</span>
+                                    @endif
+                                </span>
+                                @if($service->formatted_duration)
+                                    <span class="text-sm text-gray-500">Duration: {{ $service->formatted_duration }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                     @auth
-                    <a href="#" onclick="showServiceInfo('{{ $service->slug }}')" class="inline-flex items-center text-[#0d5c2f] font-semibold hover:text-[#b8860b] transition-colors">
+                    <a href="{{ route('booking.step1', $service) }}" class="inline-flex items-center text-[#0d5c2f] font-semibold hover:text-[#b8860b] transition-colors">
                         Book Now <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                     @else
@@ -70,37 +84,80 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @foreach($services as $service)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <i class="{{ $service->icon }} text-[#0d5c2f] mr-3 text-lg"></i>
-                                            <span class="font-semibold text-gray-900">{{ $service->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600 max-w-xs">
-                                        {{ Str::limit($service->description, 100) }}
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600">
-                                        @if($service->formatted_duration)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                <i class="fas fa-clock mr-1"></i>
-                                                {{ $service->formatted_duration }}
-                                            </span>
-                                        @else
-                                            <span class="text-gray-400">Varies</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @if($service->price > 0)
-                                            <span class="text-xl font-bold text-[#0d5c2f]">{{ $service->formatted_price }}</span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <i class="fas fa-heart mr-1"></i>
-                                                Free
-                                            </span>
-                                        @endif
-                                    </td>
-                                </tr>
+                                    @if(is_array($service->types) && count($service->types) > 0)
+                                        @foreach($service->types as $type)
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center">
+                                                        <i class="{{ $service->icon }} text-[#0d5c2f] mr-3 text-lg"></i>
+                                                        <span class="font-semibold text-gray-900">{{ is_array($type) ? ($type['name'] ?? $type[0] ?? '') : $type }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600 max-w-xs">
+                                                    {{ Str::limit($service->description, 100) }}
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600">
+                                                    @if(is_array($type) && isset($type['duration']))
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            {{ $type['duration'] }}
+                                                        </span>
+                                                    @elseif($service->formatted_duration)
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            {{ $service->formatted_duration }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-gray-400">Varies</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    @if(is_array($type) && isset($type['price']))
+                                                        <span class="text-xl font-bold text-[#0d5c2f]">₱{{ number_format($type['price'], 2) }}</span>
+                                                    @elseif($service->price > 0)
+                                                        <span class="text-xl font-bold text-[#0d5c2f]">{{ $service->formatted_price }}</span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <i class="fas fa-heart mr-1"></i>
+                                                            Free
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <i class="{{ $service->icon }} text-[#0d5c2f] mr-3 text-lg"></i>
+                                                    <span class="font-semibold text-gray-900">{{ $service->name }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-600 max-w-xs">
+                                                {{ Str::limit($service->description, 100) }}
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-600">
+                                                @if($service->formatted_duration)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <i class="fas fa-clock mr-1"></i>
+                                                        {{ $service->formatted_duration }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400">Varies</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                @if($service->price > 0)
+                                                    <span class="text-xl font-bold text-[#0d5c2f]">{{ $service->formatted_price }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <i class="fas fa-heart mr-1"></i>
+                                                        Free
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -151,13 +208,13 @@
 
     <script>
         let selectedService = '';
+        const services = @json($services);
 
         function showServiceInfo(serviceSlug) {
             selectedService = serviceSlug;
             const modal = document.getElementById('serviceInfoModal');
             const title = document.getElementById('modalTitle');
             // Find the service data
-            const services = @json($services);
             const service = services.find(s => s.slug === serviceSlug);
             if (service) {
                 title.textContent = service.name + ' Service Information';

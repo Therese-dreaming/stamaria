@@ -6,7 +6,7 @@
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Create New Service</h1>
-            <p class="text-gray-600 mt-2">Add a new service with multiple types, schedules, and pricing options</p>
+            <p class="text-gray-600 mt-2">Add a new service with schedule and pricing information</p>
         </div>
         <a href="{{ route('admin.services') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>Back to Services
@@ -62,19 +62,32 @@
             <div class="mt-6">
                 <div class="flex justify-between items-center mb-4">
                     <label class="block text-sm font-medium text-gray-700">Requirements</label>
-                    <button type="button" id="addRequirement" 
-                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
-                        <i class="fas fa-plus mr-1"></i>Add Requirement
-                    </button>
+                    <div class="flex space-x-2">
+                        <button type="button" id="addRequirement" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
+                            <i class="fas fa-plus mr-1"></i>Add Requirement
+                        </button>
+                        <button type="button" id="addConditionalRequirement" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
+                            <i class="fas fa-question-circle mr-1"></i>Add Conditional
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="requirementsContainer" class="space-y-3">
                     <!-- Requirements will be added dynamically -->
                 </div>
                 
+                <!-- Separator for conditional requirements -->
+                <div id="requirementsSeparator" class="hidden my-4 border-t border-gray-200">
+                    <div class="flex items-center justify-center">
+                        <span class="bg-white px-3 text-xs text-gray-500">Conditional Requirements</span>
+                    </div>
+                </div>
+                
                 <div class="mt-2 text-sm text-gray-600">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Add specific requirements or documents needed for this service.
+                    Add specific requirements or documents needed for this service. Use conditional requirements for cases like "Marriage Certificate if parents are married, otherwise Birth Certificate".
                 </div>
                 
                 @error('requirements')
@@ -97,124 +110,154 @@
             </div>
         </div>
 
-            <div id="generalServiceInfo" class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-6">General Service Information</h2>
-                
-                <!-- Message -->
-                <div id="generalInfoMessage" class="mt-4 mb-6 text-sm text-gray-600">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Use these fields for services that do not have different types. This information will be used if no service types are added below.
+        <!-- Service Information -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-6">Service Information</h2>
+            
+            <!-- Price, Duration & Slots -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price (₱) *</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                           value="{{ old('price') }}" placeholder="0.00">
+                    @error('price')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-                
-                <!-- Warning when service types exist -->
-                <div id="generalInfoWarning" class="mt-4 mb-6 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 hidden">
-                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                    <strong>Note:</strong> General service information will be ignored because you have added service types below. Only the individual service type configurations will be used.
+                <div>
+                    <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">Duration (minutes) *</label>
+                    <input type="number" id="duration_minutes" name="duration_minutes" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                           value="{{ old('duration_minutes') }}" placeholder="60">
+                    @error('duration_minutes')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+                <div>
+                    <label for="slots" class="block text-sm font-medium text-gray-700 mb-2">Available Slots *</label>
+                    <input type="number" id="slots" name="slots" min="1" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                           value="{{ old('slots', 1) }}" placeholder="1">
+                    <p class="text-xs text-gray-500 mt-1">Number of bookings allowed per time slot</p>
+                    @error('slots')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
 
-                <!-- General Price & Duration -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="general_price" class="block text-sm font-medium text-gray-700 mb-2">Price (₱)</label>
-                        <input type="number" id="general_price" name="general_price" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                               value="{{ old('general_price') }}" placeholder="0.00">
-                        @error('general_price')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label for="general_duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">Duration (minutes)</label>
-                        <input type="number" id="general_duration_minutes" name="general_duration_minutes" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                               value="{{ old('general_duration_minutes') }}" placeholder="60">
-                        @error('general_duration_minutes')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
+            <!-- Schedule Section -->
+            <h4 class="text-md font-medium text-gray-800 mb-4">Schedule Information</h4>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Preset</label>
+                <select name="schedule_preset" id="schedule_preset" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select a preset...</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekdays">Weekdays (Mon-Fri)</option>
+                    <option value="weekends">Weekends (Sat-Sun)</option>
+                    <option value="sundays">Sundays Only</option>
+                    <option value="saturdays">Saturdays Only</option>
+                    <option value="wed_sat">Wednesdays & Saturdays</option>
+                    <option value="custom">Custom Schedule</option>
+                </select>
+            </div>
 
-                <!-- General Schedule Section -->
-                <h4 class="text-md font-medium text-gray-800 mb-4">Schedule Information</h4>
-                
+            <div class="mb-4" id="primaryServiceTimeSection">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Primary Service Time</label>
+                <input type="time" name="service_time" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <p class="text-xs text-gray-500 mt-1">Default time for all days (only shown when no specific schedule is selected)</p>
+            </div>
+
+            <div id="customScheduleOptions" class="hidden">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Preset</label>
-                    <select name="general_schedule_preset" id="general_schedule_preset" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="">Select a preset...</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekdays">Weekdays (Mon-Fri)</option>
-                        <option value="weekends">Weekends (Sat-Sun)</option>
-                        <option value="sundays">Sundays Only</option>
-                        <option value="saturdays">Saturdays Only</option>
-                        <option value="wed_sat">Wednesdays & Saturdays</option>
-                        <option value="custom">Custom Schedule</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Custom Days</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        @foreach(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as $day)
+                        <label class="flex items-center">
+                            <input type="checkbox" name="custom_days[]" value="{{ $day }}" class="rounded border-gray-300 text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm capitalize">{{ $day }}</span>
+                        </label>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Primary Service Time</label>
-                    <input type="time" name="general_service_time" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-
-                <div id="generalCustomScheduleOptions" class="hidden">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Days</label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            @foreach(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as $day)
-                            <label class="flex items-center">
-                                <input type="checkbox" name="general_custom_days[]" value="{{ $day }}" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="ml-2 text-sm capitalize">{{ $day }}</span>
-                            </label>
-                            @endforeach
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Times</label>
+                    <div id="additionalTimesContainer" class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <input type="time" name="custom_times[]" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button type="button" id="addTimeSlot" class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Additional Times</label>
-                        <div id="generalAdditionalTimesContainer" class="space-y-2">
-                            <div class="flex items-center space-x-2">
-                                <input type="time" name="general_custom_times[]" 
-                                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <button type="button" id="addGeneralTimeSlot" class="text-green-600 hover:text-green-800">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+            <!-- Bulk Time Setting -->
+            <div id="bulkTimeSettingSection" class="mb-4 hidden">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h5 class="text-sm font-medium text-blue-800 mb-3">Bulk Time Setting</h5>
+                    <p class="text-xs text-blue-600 mb-3">Set the same time slots for multiple days at once</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-2">Apply to:</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="bulk_apply_to" value="all" class="rounded border-blue-300 text-blue-600 focus:ring-blue-600" checked>
+                                    <span class="ml-2 text-xs text-blue-700">All days in preset</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="bulk_apply_to" value="selected" class="rounded border-blue-300 text-blue-600 focus:ring-blue-600">
+                                    <span class="ml-2 text-xs text-blue-700">Selected days only</span>
+                                </label>
                             </div>
                         </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-2">Time Slots:</label>
+                            <div id="bulkTimeSlotsContainer" class="space-y-2">
+                                <div class="flex items-center space-x-2">
+                                    <input type="time" name="bulk_times[]" 
+                                           class="px-2 py-1 border border-blue-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                    <button type="button" id="addBulkTimeSlot" class="text-blue-600 hover:text-blue-800 text-sm">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" id="applyBulkTimes" 
+                                    class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors">
+                                Apply to Selected Days
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Description (Optional)</label>
-                    <textarea name="general_schedule_description" rows="2"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                              placeholder="Additional schedule information..."></textarea>
+            <!-- Day-Specific Time Slots -->
+            <div id="daySpecificTimesSection" class="mb-4 hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h5 class="text-sm font-medium text-gray-700">Day-Specific Time Slots (Optional)</h5>
+                    <button type="button" id="toggleBulkSetting" class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                        <i class="fas fa-magic mr-1"></i>Bulk Time Setting
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mb-3">Override the primary time for specific days. Leave empty to use the primary time.</p>
+                
+                <div id="daySpecificTimesContainer" class="space-y-4">
+                    <!-- Day-specific time slots will be added dynamically -->
                 </div>
             </div>
 
-        <!-- Service Types Section -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">Service Types <span class="text-sm font-normal text-gray-500">(Optional)</span></h2>
-                <button type="button" id="addServiceType" 
-                        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Add Service Type
-                </button>
-            </div>
-
-            <div id="serviceTypesContainer" class="space-y-6">
-                <!-- Service types will be added dynamically when user clicks "Add Service Type" -->
-            </div>
-
-            <div id="noServiceTypesMessage" class="text-center py-8 text-gray-500">
-                <i class="fas fa-info-circle text-2xl mb-2"></i>
-                <p class="text-sm">No service types added yet.</p>
-                <p class="text-xs mt-1">Click "Add Service Type" to create different variations of this service with their own schedules, duration, and pricing.</p>
-            </div>
-
-            <div class="mt-4 text-sm text-gray-600 hidden" id="serviceTypesInfo">
-                <i class="fas fa-info-circle mr-1"></i>
-                Add different types of this service with their own schedules, duration, and pricing.
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Description (Optional)</label>
+                <textarea name="schedule_description" rows="2"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="Additional schedule information..."></textarea>
             </div>
         </div>
 
@@ -232,126 +275,6 @@
     </form>
 </div>
 
-<!-- Service Type Template -->
-<template id="serviceTypeTemplate">
-    <div class="service-type-card border-2 border-gray-200 rounded-lg p-6 relative">
-        <button type="button" class="remove-service-type absolute top-3 right-3 text-red-500 hover:text-red-700 text-sm">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Service Type Name -->
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Service Type Name *</label>
-                <input type="text" name="service_types[__INDEX__][name]" required 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                       placeholder="e.g., Standard Wedding, Garden Wedding">
-            </div>
-
-            <!-- Price -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Price (₱)</label>
-                <input type="number" name="service_types[__INDEX__][price]" step="0.01" min="0"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                       placeholder="0.00">
-            </div>
-
-            <!-- Duration -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Duration (minutes)</label>
-                <input type="number" name="service_types[__INDEX__][duration_minutes]" min="0"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                       placeholder="60">
-            </div>
-        </div>
-
-        <!-- Schedule Section -->
-        <div class="mt-6">
-            <h4 class="text-md font-medium text-gray-800 mb-4">Schedule Information</h4>
-            
-            <!-- Schedule Preset -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Preset</label>
-                <select name="service_types[__INDEX__][schedule_preset]" class="schedule-preset w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">Select a preset...</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekdays">Weekdays (Mon-Fri)</option>
-                    <option value="weekends">Weekends (Sat-Sun)</option>
-                    <option value="sundays">Sundays Only</option>
-                    <option value="saturdays">Saturdays Only</option>
-                    <option value="wed_sat">Wednesdays & Saturdays</option>
-                    <option value="custom">Custom Schedule</option>
-                </select>
-            </div>
-
-            <!-- Primary Service Time -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Primary Service Time</label>
-                <input type="time" name="service_types[__INDEX__][service_time]" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-            </div>
-
-            <!-- Custom Schedule Options (hidden by default) -->
-            <div class="custom-schedule-options hidden">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Custom Days</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="sunday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Sunday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="monday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Monday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="tuesday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Tuesday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="wednesday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Wednesday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="thursday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Thursday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="friday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Friday</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="service_types[__INDEX__][custom_days][]" value="saturday" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Saturday</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Times</label>
-                    <div class="additional-times-container space-y-2">
-                        <div class="flex items-center space-x-2">
-                            <input type="time" name="service_types[__INDEX__][custom_times][]" 
-                                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <button type="button" class="add-time-slot text-green-600 hover:text-green-800">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Schedule Description -->
-            <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Description (Optional)</label>
-                <textarea name="service_types[__INDEX__][schedule_description]" rows="2"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="Additional schedule information..."></textarea>
-            </div>
-        </div>
-    </div>
-</template>
-
 <!-- Requirement Template -->
 <template id="requirementTemplate">
     <div class="requirement-item flex items-start space-x-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
@@ -365,71 +288,398 @@
         </button>
     </div>
 </template>
+
+<!-- Conditional Requirement Template -->
+<template id="conditionalRequirementTemplate">
+    <div class="conditional-requirement-item border border-blue-200 rounded-lg bg-blue-50 p-4 mb-3">
+        <div class="flex items-center justify-between mb-3">
+            <h6 class="text-sm font-medium text-blue-800 flex items-center">
+                <i class="fas fa-question-circle mr-2 text-blue-600"></i>
+                Conditional Requirement
+            </h6>
+            <button type="button" class="remove-conditional-requirement text-red-500 hover:text-red-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Condition -->
+        <div class="mb-3">
+            <label class="block text-xs font-medium text-blue-700 mb-1">Condition</label>
+            <input type="text" name="requirement_conditions[]" 
+                   class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                   placeholder="e.g., If parents are married">
+        </div>
+        
+        <!-- Primary Requirement -->
+        <div class="mb-3">
+            <label class="block text-xs font-medium text-blue-700 mb-1">Primary Requirement</label>
+            <input type="text" name="requirements[]" 
+                   class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                   placeholder="e.g., Marriage Certificate">
+        </div>
+        
+        <!-- Alternative Requirements -->
+        <div class="mb-3">
+            <div class="flex items-center justify-between mb-2">
+                <label class="block text-xs font-medium text-blue-700">Alternative Requirements</label>
+                <button type="button" class="add-alternative-requirement text-blue-600 hover:text-blue-800 text-xs">
+                    <i class="fas fa-plus mr-1"></i>Add Alternative
+                </button>
+            </div>
+            <div class="alternative-requirements-container space-y-2">
+                <div class="flex items-center space-x-2">
+                    <input type="text" name="alternative_requirements[]" 
+                           class="flex-1 px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                           placeholder="e.g., Birth Certificate">
+                    <button type="button" class="remove-alternative-requirement text-red-500 hover:text-red-700 text-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-xs text-blue-600 mt-1">
+                <i class="fas fa-info-circle mr-1"></i>
+                These requirements apply when the condition is not met
+            </p>
+        </div>
+    </div>
+</template>
+
+<!-- Alternative Requirement Template -->
+<template id="alternativeRequirementTemplate">
+    <div class="flex items-center space-x-2">
+        <input type="text" name="alternative_requirements[]" 
+               class="flex-1 px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+               placeholder="e.g., Birth Certificate">
+        <button type="button" class="remove-alternative-requirement text-red-500 hover:text-red-700 text-sm">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</template>
+
+<!-- Day-Specific Time Slot Template -->
+<template id="dayTimeSlotTemplate">
+    <div class="day-time-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-3">
+                <label class="flex items-center">
+                    <input type="checkbox" name="selected_days[]" value="__DAY__" 
+                           class="rounded border-gray-300 text-primary focus:ring-primary day-checkbox">
+                    <span class="ml-2 font-medium text-gray-800 capitalize day-name"></span>
+                </label>
+            </div>
+            <button type="button" class="remove-day-time-slot text-red-500 hover:text-red-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="space-y-2">
+            <div class="flex items-center space-x-2">
+                <input type="time" name="day_specific_times[__DAY__][]" 
+                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <button type="button" class="add-day-time-slot text-green-600 hover:text-green-800">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
 @endsection
 
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let serviceTypeIndex = 0;
-    const container = document.getElementById('serviceTypesContainer');
-    const template = document.getElementById('serviceTypeTemplate');
-    const addButton = document.getElementById('addServiceType');
-    
     // Requirements management
     const requirementsContainer = document.getElementById('requirementsContainer');
     const requirementTemplate = document.getElementById('requirementTemplate');
+    const conditionalRequirementTemplate = document.getElementById('conditionalRequirementTemplate');
+    const alternativeRequirementTemplate = document.getElementById('alternativeRequirementTemplate');
     const addRequirementButton = document.getElementById('addRequirement');
+    const addConditionalRequirementButton = document.getElementById('addConditionalRequirement');
+    const requirementsSeparator = document.getElementById('requirementsSeparator');
     
-    // General schedule management
-    const generalSchedulePreset = document.getElementById('general_schedule_preset');
-    const generalCustomOptions = document.getElementById('generalCustomScheduleOptions');
-    const addGeneralTimeBtn = document.getElementById('addGeneralTimeSlot');
-    const generalTimesContainer = document.getElementById('generalAdditionalTimesContainer');
+    // Schedule management
+    const schedulePreset = document.getElementById('schedule_preset');
+    const customOptions = document.getElementById('customScheduleOptions');
+    const daySpecificSection = document.getElementById('daySpecificTimesSection');
+    const daySpecificContainer = document.getElementById('daySpecificTimesContainer');
+    const bulkTimeSection = document.getElementById('bulkTimeSettingSection');
+    const toggleBulkBtn = document.getElementById('toggleBulkSetting');
+    const addTimeBtn = document.getElementById('addTimeSlot');
+    const timesContainer = document.getElementById('additionalTimesContainer');
+    const primaryServiceTimeSection = document.getElementById('primaryServiceTimeSection');
+    
+    // Bulk time management
+    const addBulkTimeBtn = document.getElementById('addBulkTimeSlot');
+    const bulkTimeContainer = document.getElementById('bulkTimeSlotsContainer');
+    const applyBulkBtn = document.getElementById('applyBulkTimes');
     
     // Add first requirement by default
     addRequirement();
     
     // Add requirement button click
     addRequirementButton.addEventListener('click', addRequirement);
+    addConditionalRequirementButton.addEventListener('click', addConditionalRequirement);
     
-    // General schedule preset functionality
-    generalSchedulePreset.addEventListener('change', function() {
+    // Schedule preset functionality
+    schedulePreset.addEventListener('change', function() {
         if (this.value === 'custom') {
-            generalCustomOptions.classList.remove('hidden');
+            customOptions.classList.remove('hidden');
+            daySpecificSection.classList.remove('hidden');
+            primaryServiceTimeSection.classList.add('hidden');
+            bulkTimeSection.classList.add('hidden');
+        } else if (this.value && this.value !== '') {
+            customOptions.classList.add('hidden');
+            daySpecificSection.classList.remove('hidden');
+            primaryServiceTimeSection.classList.add('hidden');
+            bulkTimeSection.classList.add('hidden');
+            updateDaySpecificTimes();
         } else {
-            generalCustomOptions.classList.add('hidden');
+            customOptions.classList.add('hidden');
+            daySpecificSection.classList.add('hidden');
+            primaryServiceTimeSection.classList.remove('hidden');
+            bulkTimeSection.classList.add('hidden');
         }
     });
     
-    // General add time slot functionality
-    addGeneralTimeBtn.addEventListener('click', function() {
+    // Toggle bulk time setting
+    toggleBulkBtn.addEventListener('click', function() {
+        if (bulkTimeSection.classList.contains('hidden')) {
+            bulkTimeSection.classList.remove('hidden');
+            toggleBulkBtn.innerHTML = '<i class="fas fa-times mr-1"></i>Hide Bulk Setting';
+        } else {
+            bulkTimeSection.classList.add('hidden');
+            toggleBulkBtn.innerHTML = '<i class="fas fa-magic mr-1"></i>Bulk Time Setting';
+        }
+    });
+    
+    // Add bulk time slot
+    addBulkTimeBtn.addEventListener('click', function() {
         const newTimeSlot = document.createElement('div');
         newTimeSlot.className = 'flex items-center space-x-2';
         newTimeSlot.innerHTML = `
-            <input type="time" name="general_custom_times[]" 
-                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-            <button type="button" class="remove-general-time-slot text-red-600 hover:text-red-800">
+            <input type="time" name="bulk_times[]" 
+                   class="px-2 py-1 border border-blue-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+            <button type="button" class="remove-bulk-time-slot text-red-600 hover:text-red-800 text-sm">
                 <i class="fas fa-times"></i>
             </button>
         `;
         
-        generalTimesContainer.appendChild(newTimeSlot);
+        bulkTimeContainer.appendChild(newTimeSlot);
+        
+        // Add remove functionality
+        newTimeSlot.querySelector('.remove-bulk-time-slot').addEventListener('click', function() {
+            if (bulkTimeContainer.children.length > 1) {
+                newTimeSlot.remove();
+            }
+        });
+    });
+    
+    // Apply bulk times
+    applyBulkBtn.addEventListener('click', function() {
+        const applyTo = document.querySelector('input[name="bulk_apply_to"]:checked').value;
+        const bulkTimes = Array.from(bulkTimeContainer.querySelectorAll('input[name="bulk_times[]"]'))
+            .map(input => input.value)
+            .filter(time => time !== '');
+        
+        if (bulkTimes.length === 0) {
+            alert('Please add at least one time slot');
+            return;
+        }
+        
+        if (applyTo === 'all') {
+            // Apply to all days in the preset
+            const daySlots = daySpecificContainer.querySelectorAll('.day-time-slot');
+            daySlots.forEach(daySlot => {
+                const timeContainer = daySlot.querySelector('.space-y-2');
+                timeContainer.innerHTML = ''; // Clear existing times
+                
+                bulkTimes.forEach(time => {
+                    const timeInput = document.createElement('div');
+                    timeInput.className = 'flex items-center space-x-2';
+                    timeInput.innerHTML = `
+                        <input type="time" name="day_specific_times[${daySlot.querySelector('.day-name').textContent.toLowerCase()}][]" 
+                               value="${time}"
+                               class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <button type="button" class="remove-day-time-slot text-red-600 hover:text-red-800">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    timeContainer.appendChild(timeInput);
+                });
+            });
+        } else {
+            // Apply to selected days only
+            const selectedDays = Array.from(daySpecificContainer.querySelectorAll('.day-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedDays.length === 0) {
+                alert('Please select at least one day');
+                return;
+            }
+            
+            selectedDays.forEach(day => {
+                const daySlot = daySpecificContainer.querySelector(`[data-day="${day}"]`);
+                if (daySlot) {
+                    const timeContainer = daySlot.querySelector('.space-y-2');
+                    timeContainer.innerHTML = ''; // Clear existing times
+                    
+                    bulkTimes.forEach(time => {
+                        const timeInput = document.createElement('div');
+                        timeInput.className = 'flex items-center space-x-2';
+                        timeInput.innerHTML = `
+                            <input type="time" name="day_specific_times[${day}][]" 
+                                   value="${time}"
+                                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button type="button" class="remove-day-time-slot text-red-600 hover:text-red-800">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        timeContainer.appendChild(timeInput);
+                    });
+                }
+            });
+        }
+        
+        // Hide bulk section after applying
+        bulkTimeSection.classList.add('hidden');
+        toggleBulkBtn.innerHTML = '<i class="fas fa-magic mr-1"></i>Bulk Time Setting';
+    });
+    
+    // Add time slot functionality
+    addTimeBtn.addEventListener('click', function() {
+        const newTimeSlot = document.createElement('div');
+        newTimeSlot.className = 'flex items-center space-x-2';
+        newTimeSlot.innerHTML = `
+            <input type="time" name="custom_times[]" 
+                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+            <button type="button" class="remove-time-slot text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        timesContainer.appendChild(newTimeSlot);
         
         // Add remove functionality to the new time slot
-        newTimeSlot.querySelector('.remove-general-time-slot').addEventListener('click', function() {
+        newTimeSlot.querySelector('.remove-time-slot').addEventListener('click', function() {
             newTimeSlot.remove();
         });
     });
     
-    // Remove general time slot functionality for existing slots
-    generalTimesContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-general-time-slot') || e.target.parentElement.classList.contains('remove-general-time-slot')) {
+    // Remove time slot functionality for existing slots
+    timesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-time-slot') || e.target.parentElement.classList.contains('remove-time-slot')) {
             const timeSlot = e.target.closest('.flex');
-            if (timeSlot && generalTimesContainer.children.length > 1) {
+            if (timeSlot && timesContainer.children.length > 1) {
                 timeSlot.remove();
             }
         }
     });
+    
+    function updateDaySpecificTimes() {
+        // Clear existing day-specific times
+        daySpecificContainer.innerHTML = '';
+        
+        const preset = schedulePreset.value;
+        let days = [];
+        
+        // Get days based on preset
+        switch (preset) {
+            case 'daily':
+                days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                break;
+            case 'weekdays':
+                days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                break;
+            case 'weekends':
+                days = ['saturday', 'sunday'];
+                break;
+            case 'sundays':
+                days = ['sunday'];
+                break;
+            case 'saturdays':
+                days = ['saturday'];
+                break;
+            case 'wed_sat':
+                days = ['wednesday', 'saturday'];
+                break;
+        }
+        
+        // Add day-specific time slots for each day
+        days.forEach(day => {
+            addDayTimeSlot(day);
+        });
+        
+        // Update remove button visibility based on preset type
+        updateRemoveButtonVisibility();
+    }
+    
+    function updateRemoveButtonVisibility() {
+        const preset = schedulePreset.value;
+        const removeButtons = daySpecificContainer.querySelectorAll('.remove-day-time-slot');
+        
+        removeButtons.forEach(button => {
+            if (preset === 'custom') {
+                button.style.display = 'block';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+    }
+    
+    function addDayTimeSlot(day) {
+        const template = document.getElementById('dayTimeSlotTemplate');
+        const clone = template.content.cloneNode(true);
+        
+        // Replace placeholders
+        const dayName = clone.querySelector('.day-name');
+        const timeInput = clone.querySelector('input[name*="__DAY__"]');
+        const checkbox = clone.querySelector('input[name="selected_days[]"]');
+        
+        dayName.textContent = day;
+        timeInput.name = timeInput.name.replace('__DAY__', day);
+        checkbox.value = day;
+        
+        const daySlot = clone.firstElementChild;
+        daySlot.setAttribute('data-day', day);
+        daySpecificContainer.appendChild(daySlot);
+        
+        // Add functionality for adding more time slots to this day
+        const addBtn = daySlot.querySelector('.add-day-time-slot');
+        const timeContainer = daySlot.querySelector('.space-y-2');
+        
+        addBtn.addEventListener('click', function() {
+            const newTimeSlot = document.createElement('div');
+            newTimeSlot.className = 'flex items-center space-x-2';
+            newTimeSlot.innerHTML = `
+                <input type="time" name="day_specific_times[${day}][]" 
+                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <button type="button" class="remove-day-time-slot text-red-600 hover:text-red-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            timeContainer.appendChild(newTimeSlot);
+            
+            // Add remove functionality
+            newTimeSlot.querySelector('.remove-day-time-slot').addEventListener('click', function() {
+                if (timeContainer.children.length > 1) {
+                    newTimeSlot.remove();
+                }
+            });
+        });
+        
+        // Add remove functionality for day slots (only for custom schedules)
+        const removeDayBtn = daySlot.querySelector('.remove-day-time-slot');
+        if (schedulePreset.value === 'custom') {
+            removeDayBtn.addEventListener('click', function() {
+                if (daySpecificContainer.children.length > 1) {
+                    daySlot.remove();
+                }
+            });
+        } else {
+            // Hide remove button for preset schedules
+            removeDayBtn.style.display = 'none';
+        }
+    }
     
     function addRequirement() {
         const clone = requirementTemplate.content.cloneNode(true);
@@ -452,7 +702,58 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide remove button for first requirement if it's the only one
         updateRequirementRemoveButtons();
     }
-    
+
+    function addConditionalRequirement() {
+        const clone = conditionalRequirementTemplate.content.cloneNode(true);
+        const newConditionalRequirement = clone.firstElementChild;
+        
+        requirementsContainer.appendChild(newConditionalRequirement);
+
+        // Add remove functionality
+        const removeBtn = newConditionalRequirement.querySelector('.remove-conditional-requirement');
+        removeBtn.addEventListener('click', function() {
+            if (requirementsContainer.children.length > 1) {
+                newConditionalRequirement.remove();
+            } else {
+                // Clear the input instead of removing if it's the last one
+                const inputs = newConditionalRequirement.querySelectorAll('input');
+                inputs.forEach(input => input.value = '');
+            }
+        });
+
+        // Add alternative requirement functionality
+        const addAlternativeBtn = newConditionalRequirement.querySelector('.add-alternative-requirement');
+        const alternativeContainer = newConditionalRequirement.querySelector('.alternative-requirements-container');
+        
+        addAlternativeBtn.addEventListener('click', function() {
+            const alternativeTemplate = document.getElementById('alternativeRequirementTemplate');
+            const newAlternative = alternativeTemplate.content.cloneNode(true);
+            
+            // Add remove functionality to the new alternative
+            const removeAlternativeBtn = newAlternative.querySelector('.remove-alternative-requirement');
+            removeAlternativeBtn.addEventListener('click', function() {
+                if (alternativeContainer.children.length > 1) {
+                    newAlternative.firstElementChild.remove();
+                }
+            });
+            
+            alternativeContainer.appendChild(newAlternative);
+        });
+
+        // Add remove functionality to existing alternative requirements
+        const existingRemoveBtns = newConditionalRequirement.querySelectorAll('.remove-alternative-requirement');
+        existingRemoveBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (alternativeContainer.children.length > 1) {
+                    btn.closest('.flex').remove();
+                }
+            });
+        });
+
+        // Hide remove button for first conditional requirement if it's the only one
+        updateConditionalRequirementRemoveButtons();
+    }
+
     function updateRequirementRemoveButtons() {
         const requirements = requirementsContainer.querySelectorAll('.requirement-item');
         requirements.forEach((req, index) => {
@@ -463,128 +764,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 removeBtn.style.display = 'block';
             }
         });
+        
+        // Update separator visibility
+        updateRequirementsSeparator();
     }
-    
-    // Add service type button click
-    addButton.addEventListener('click', function() {
-        addServiceType();
-        updateServiceTypesVisibility();
-    });
-    
-    function addServiceType() {
-        const clone = template.content.cloneNode(true);
-        
-        // Replace __INDEX__ with actual index
-        const html = clone.firstElementChild.outerHTML.replace(/__INDEX__/g, serviceTypeIndex);
-        
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
-        const newCard = wrapper.firstElementChild;
-        
-        container.appendChild(newCard);
-        
-        // Add event listeners for this card
-        setupServiceTypeCard(newCard, serviceTypeIndex);
-        
-        serviceTypeIndex++;
-    }
-    
-    function updateServiceTypesVisibility() {
-        const noMessage = document.getElementById('noServiceTypesMessage');
-        const infoDiv = document.getElementById('serviceTypesInfo');
-        const generalInfoMessage = document.getElementById('generalInfoMessage');
-        const generalInfoWarning = document.getElementById('generalInfoWarning');
-        
-        if (container.children.length === 0) {
-            noMessage.classList.remove('hidden');
-            infoDiv.classList.add('hidden');
-            // Show normal message, hide warning
-            generalInfoMessage.classList.remove('hidden');
-            generalInfoWarning.classList.add('hidden');
-        } else {
-            noMessage.classList.add('hidden');
-            infoDiv.classList.remove('hidden');
-            // Hide normal message, show warning
-            generalInfoMessage.classList.add('hidden');
-            generalInfoWarning.classList.remove('hidden');
-        }
-    }
-    
-    function setupServiceTypeCard(card, index) {
-        // Remove button functionality
-        const removeBtn = card.querySelector('.remove-service-type');
-        removeBtn.addEventListener('click', function() {
-            card.remove();
-            updateServiceTypesVisibility();
-        });
-        
-        // Schedule preset change handler
-        const schedulePreset = card.querySelector('.schedule-preset');
-        const customOptions = card.querySelector('.custom-schedule-options');
-        
-        schedulePreset.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                customOptions.classList.remove('hidden');
+
+    function updateConditionalRequirementRemoveButtons() {
+        const conditionalRequirements = requirementsContainer.querySelectorAll('.conditional-requirement-item');
+        conditionalRequirements.forEach((req, index) => {
+            const removeBtn = req.querySelector('.remove-conditional-requirement');
+            if (conditionalRequirements.length === 1) {
+                removeBtn.style.display = 'none';
             } else {
-                customOptions.classList.add('hidden');
+                removeBtn.style.display = 'block';
             }
         });
         
-        // Add time slot functionality
-        const addTimeBtn = card.querySelector('.add-time-slot');
-        const timesContainer = card.querySelector('.additional-times-container');
-        
-        addTimeBtn.addEventListener('click', function() {
-            const newTimeSlot = document.createElement('div');
-            newTimeSlot.className = 'flex items-center space-x-2';
-            newTimeSlot.innerHTML = `
-                <input type="time" name="service_types[${index}][custom_times][]" 
-                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                <button type="button" class="remove-time-slot text-red-600 hover:text-red-800">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            timesContainer.appendChild(newTimeSlot);
-            
-            // Add remove functionality to the new time slot
-            newTimeSlot.querySelector('.remove-time-slot').addEventListener('click', function() {
-                newTimeSlot.remove();
-            });
-        });
-        
-        // Remove time slot functionality for existing slots
-        card.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-time-slot') || e.target.parentElement.classList.contains('remove-time-slot')) {
-                const timeSlot = e.target.closest('.flex');
-                if (timeSlot && timesContainer.children.length > 1) {
-                    timeSlot.remove();
-                }
-            }
-        });
-        
-        // All service types can now be removed since they're optional
+        // Update separator visibility
+        updateRequirementsSeparator();
     }
     
-    // Form validation
-    document.getElementById('serviceForm').addEventListener('submit', function(e) {
-        const serviceTypes = container.querySelectorAll('.service-type-card');
-        let isValid = true;
+    function updateRequirementsSeparator() {
+        const regularRequirements = requirementsContainer.querySelectorAll('.requirement-item');
+        const conditionalRequirements = requirementsContainer.querySelectorAll('.conditional-requirement-item');
         
-        serviceTypes.forEach(function(card, index) {
-            const nameInput = card.querySelector('input[name*="[name]"]');
-            if (!nameInput || !nameInput.value.trim()) {
-                isValid = false;
-                alert(`Service Type ${index + 1} name is required.`);
-                nameInput.focus();
-                return false;
-            }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
+        if (regularRequirements.length > 0 && conditionalRequirements.length > 0) {
+            requirementsSeparator.classList.remove('hidden');
+        } else {
+            requirementsSeparator.classList.add('hidden');
         }
-    });
+    }
 });
 </script>
 @endsection
