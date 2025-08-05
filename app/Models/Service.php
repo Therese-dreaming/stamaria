@@ -100,4 +100,42 @@ class Service extends Model
         return $this->formFields()->where('is_conditional', true);
     }
 
+    /**
+     * Get the bookings for this service
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Get available slots for a specific date and time
+     */
+    public function getAvailableSlots($date, $time)
+    {
+        $bookedSlots = $this->bookings()
+            ->where('booking_date', $date)
+            ->where('booking_time', $time)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+            
+        return max(0, $this->slots - $bookedSlots);
+    }
+
+    /**
+     * Check if a time slot is available
+     */
+    public function isTimeSlotAvailable($date, $time)
+    {
+        return $this->getAvailableSlots($date, $time) > 0;
+    }
+
+    /**
+     * Get remaining slots for a specific date and time
+     */
+    public function getRemainingSlots($date, $time)
+    {
+        return $this->getAvailableSlots($date, $time);
+    }
+
 }

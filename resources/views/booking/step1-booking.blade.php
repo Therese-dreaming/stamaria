@@ -122,92 +122,50 @@
                     @csrf
                     <input type="hidden" name="service_id" value="{{ $service->id }}">
                     
-                    <!-- Personal Information -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
-                            <input type="text" id="first_name" name="first_name" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                   value="{{ old('first_name', auth()->user()->first_name ?? '') }}">
-                            @error('first_name')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                    <!-- Personal Information (Read-only) -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-semibold text-lg mb-4 text-gray-700">Personal Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">First Name</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->first_name }}</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Last Name</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->last_name }}</div>
+                            </div>
                         </div>
-                        
-                        <div>
-                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
-                            <input type="text" id="last_name" name="last_name" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                   value="{{ old('last_name', auth()->user()->last_name ?? '') }}">
-                            @error('last_name')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                            <input type="email" id="email" name="email" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                   value="{{ old('email', auth()->user()->email ?? '') }}">
-                            @error('email')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Email</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->email }}</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->phone }}</div>
+                            </div>
                         </div>
-                        
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                            <input type="tel" id="phone" name="phone" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                   value="{{ old('phone', auth()->user()->phone ?? '') }}">
-                            @error('phone')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
 
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
-                        <textarea id="address" name="address" rows="3" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                  placeholder="Enter your complete address">{{ old('address') }}</textarea>
-                        @error('address')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Preferred Date and Time -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="preferred_date" class="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
-                            <input type="date" id="preferred_date" name="preferred_date" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                   min="{{ date('Y-m-d') }}">
-                            @error('preferred_date')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Address</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->address }}</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Age</label>
+                                <div class="text-gray-900 font-medium">{{ auth()->user()->age }} years old</div>
+                            </div>
                         </div>
-                        
-                        <div>
-                            <label for="preferred_time" class="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
-                            <input type="time" id="preferred_time" name="preferred_time" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent">
-                            @error('preferred_time')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
 
-                    <!-- Special Requests -->
-                    <div>
-                        <label for="special_requests" class="block text-sm font-medium text-gray-700 mb-2">Special Requests (Optional)</label>
-                        <textarea id="special_requests" name="special_requests" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d5c2f] focus:border-transparent"
-                                  placeholder="Any special requests or additional information...">{{ old('special_requests') }}</textarea>
-                        @error('special_requests')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                        <div class="mt-4 text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            To update your information, please visit your 
+                            <a href="{{ route('profile.edit') }}" class="text-[#0d5c2f] hover:underline">profile settings</a>.
+                        </div>
                     </div>
 
                     <!-- Terms and Conditions -->

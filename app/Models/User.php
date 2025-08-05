@@ -19,7 +19,12 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'phone',
+        'address',
+        'age',
         'password',
         'first_login',
         'role',
@@ -78,5 +83,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasAnyRole(array $roles): bool
     {
         return in_array($this->role, $roles);
+    }
+
+    /**
+     * Get the bookings for this user
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Check if user's profile is complete
+     */
+    public function isProfileComplete(): bool
+    {
+        return !empty($this->first_name) && 
+               !empty($this->last_name) && 
+               !empty($this->phone) && 
+               !empty($this->address) && 
+               !empty($this->age);
     }
 }

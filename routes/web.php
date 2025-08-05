@@ -68,6 +68,15 @@ Route::post('/booking/step2', [App\Http\Controllers\BookingController::class, 's
 // Booking step 3
 Route::post('/booking/step3', [App\Http\Controllers\BookingController::class, 'step3'])->middleware(['auth', 'verified'])->name('booking.step3');
 
+// AJAX endpoint for getting available time slots
+Route::post('/booking/available-times', [App\Http\Controllers\BookingController::class, 'getAvailableTimeSlots'])->middleware(['auth', 'verified'])->name('booking.available-times');
+
+// Profile routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+});
+
 // Admin routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
