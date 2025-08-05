@@ -156,7 +156,7 @@
                         </a>
                         <button type="submit" id="continue-btn" disabled
                                 class="bg-gray-300 text-gray-500 px-6 py-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed">
-                            Continue to Review <i class="fas fa-arrow-right ml-2"></i>
+                            Continue to Requirements <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
                 </form>
@@ -292,19 +292,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayTimeSlots(formattedTimes, availableTimes, slotInfo, slotsRemaining = 1) {
         const timeSlotsContainer = document.getElementById('time-slots');
         timeSlotsContainer.innerHTML = '';
-
+    
         if (formattedTimes.length === 0) {
             timeSlotsContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 py-4">No available time slots for this date.</div>';
             document.getElementById('time-slots-section').style.display = 'none';
             return;
         }
-
+    
         // Add slot information header
         const slotInfoHeader = document.createElement('div');
         slotInfoHeader.className = 'col-span-full text-sm text-gray-600 mb-3 text-center';
         slotInfoHeader.innerHTML = `<i class="fas fa-info-circle mr-1"></i>Select a time slot below. Numbers show remaining slots.`;
         timeSlotsContainer.appendChild(slotInfoHeader);
-
+    
         // Check if any slots are running low
         const lowSlots = slotInfo.filter(slot => slot.remaining_slots <= 1).length;
         if (lowSlots > 0) {
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
             warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>${lowSlots} time slot${lowSlots > 1 ? 's' : ''} with limited availability`;
             timeSlotsContainer.appendChild(warningDiv);
         }
-
+    
         formattedTimes.forEach((formattedTime, index) => {
             const timeSlot = document.createElement('div');
             timeSlot.className = 'text-center py-3 px-4 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-[#0d5c2f]/10 hover:border-[#0d5c2f] transition-colors relative';
@@ -327,23 +327,23 @@ document.addEventListener('DOMContentLoaded', function() {
             timeSlot.innerHTML = `
                 <div class="font-medium text-gray-900">${formattedTime}</div>
                 <div class="text-xs text-gray-500 mt-1">
-                    <span class="font-semibold text-[#0d5c2f]">${remainingSlots}</span> of ${totalSlots} slots left
+                    <span class="slot-remaining font-semibold text-[#0d5c2f]">${remainingSlots}</span> of ${totalSlots} slots left
                 </div>
             `;
             
             // Add visual indicator for low availability
             if (remainingSlots <= 1) {
                 timeSlot.classList.add('border-orange-300', 'bg-orange-50');
-                timeSlot.querySelector('.text-[#0d5c2f]').classList.add('text-orange-600');
+                timeSlot.querySelector('.slot-remaining').classList.add('text-orange-600');
             } else if (remainingSlots <= Math.ceil(totalSlots / 2)) {
                 timeSlot.classList.add('border-yellow-300', 'bg-yellow-50');
-                timeSlot.querySelector('.text-[#0d5c2f]').classList.add('text-yellow-600');
+                timeSlot.querySelector('.slot-remaining').classList.add('text-yellow-600');
             }
             
             timeSlot.addEventListener('click', () => selectTime(availableTimes[index], formattedTime, remainingSlots));
             timeSlotsContainer.appendChild(timeSlot);
         });
-
+    
         document.getElementById('time-slots-section').style.display = 'block';
     }
 

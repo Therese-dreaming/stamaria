@@ -68,6 +68,9 @@ Route::post('/booking/step2', [App\Http\Controllers\BookingController::class, 's
 // Booking step 3
 Route::post('/booking/step3', [App\Http\Controllers\BookingController::class, 'step3'])->middleware(['auth', 'verified'])->name('booking.step3');
 
+// Booking step 4 (final submission with requirements)
+Route::post('/booking/step4', [App\Http\Controllers\BookingController::class, 'step4'])->middleware(['auth', 'verified'])->name('booking.step4');
+
 // AJAX endpoint for getting available time slots
 Route::post('/booking/available-times', [App\Http\Controllers\BookingController::class, 'getAvailableTimeSlots'])->middleware(['auth', 'verified'])->name('booking.available-times');
 
@@ -92,11 +95,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
     Route::delete('/services/{service}', [AdminController::class, 'destroyService'])->name('services.destroy');
     
-    // Service form fields management
-    Route::get('/services/{service}/form-fields', [App\Http\Controllers\ServiceFormFieldController::class, 'index'])->name('services.form-fields');
-    Route::post('/services/{service}/form-fields', [App\Http\Controllers\ServiceFormFieldController::class, 'store'])->name('services.form-fields.store');
-    Route::put('/services/{service}/form-fields/{formField}', [App\Http\Controllers\ServiceFormFieldController::class, 'update'])->name('services.form-fields.update');
-    Route::delete('/services/{service}/form-fields/{formField}', [App\Http\Controllers\ServiceFormFieldController::class, 'destroy'])->name('services.form-fields.destroy');
+
     
     // Users management
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('users');

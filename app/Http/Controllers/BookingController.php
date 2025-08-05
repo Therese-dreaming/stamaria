@@ -49,8 +49,8 @@ class BookingController extends Controller
         ]);
         $request->session()->put('booking.step1', $step1Data);
 
-        // Load service with form fields
-        $service = Service::with('formFields')->findOrFail($request->service_id);
+        // Load service
+        $service = Service::findOrFail($request->service_id);
 
         // Check if service is active (if you have an is_active field)
         if (isset($service->is_active) && !$service->is_active) {
@@ -118,8 +118,8 @@ class BookingController extends Controller
             'special_requests' => 'nullable|string|max:1000',
         ]);
 
-        // Load service with form fields
-        $service = Service::with('formFields')->findOrFail($request->service_id);
+        // Load service
+        $service = Service::findOrFail($request->service_id);
 
         // Check if service is active (if you have an is_active field)
         if (isset($service->is_active) && !$service->is_active) {
@@ -199,52 +199,6 @@ class BookingController extends Controller
             }
         }
 
-        // Build validation rules for custom fields
-        $validationRules = [];
-        $customFields = [];
-
-        foreach ($service->formFields as $field) {
-            $fieldName = 'custom_field_' . $field->field_name;
-            $customFields[$fieldName] = $field;
-
-            // Base validation rules from field configuration
-            if ($field->validation_rules) {
-                $validationRules[$fieldName] = $field->validation_rules;
-            }
-
-            // Handle conditional validation
-            if ($field->is_conditional && $field->required) {
-                $conditionField = 'custom_field_' . $field->condition_field;
-                $conditionValue = $field->condition_value;
-
-                // Check if the condition is met
-                $conditionMet = false;
-                if ($request->has($conditionField)) {
-                    $conditionFieldValue = $request->input($conditionField);
-                    $conditionMet = ($conditionFieldValue == $conditionValue);
-                }
-
-                // If condition is met, make the field required
-                if ($conditionMet) {
-                    if (isset($validationRules[$fieldName])) {
-                        $validationRules[$fieldName] = 'required|' . $validationRules[$fieldName];
-                    } else {
-                        $validationRules[$fieldName] = 'required';
-                    }
-                }
-            } elseif ($field->required && !$field->is_conditional) {
-                // Always required field
-                if (isset($validationRules[$fieldName])) {
-                    $validationRules[$fieldName] = 'required|' . $validationRules[$fieldName];
-                } else {
-                    $validationRules[$fieldName] = 'required';
-                }
-            }
-        }
-
-        // Validate the request
-        $request->validate($validationRules);
-
         // Store step 2 data in session
         $step2Data = $request->except(['_token', 'service_id']);
         $request->session()->put('booking.step2', $step2Data);
@@ -252,7 +206,72 @@ class BookingController extends Controller
         // Combine all booking data
         $bookingData = array_merge($step1Data, $step2Data);
         $bookingData['service'] = $service;
-        $bookingData['custom_fields'] = $customFields;
+
+        // Show step 3 - requirements upload
+        return view('booking.step3-booking', compact('service', 'bookingData'));
+    }
+
+    /**
+     * Final step - Submit booking with requirements
+     */
+    public function step4(Request $request)
+    {
+        // Validate step 3 data
+        $request->validate([
+            'service_id' => 'required|exists:services,id',
+            'requirements.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240', // 10MB max
+        ]);
+
+        // Load service
+        $service = Service::findOrFail($request->service_id);
+
+        // Get step 1 and 2 data from session
+        $step1Data = $request->session()->get('booking.step1');
+        $step2Data = $request->session()->get('booking.step2');
+        
+        if (!$step1Data || !$step2Data) {
+            return redirect()->route('booking.step1', $service);
+        }
+
+        // Create the booking
+        $booking = Booking::create([
+            'user_id' => auth()->id(),
+            'service_id' => $service->id,
+            'booking_date' => $step2Data['booking_date'],
+            'booking_time' => $step2Data['booking_time'],
+            'special_requests' => $step2Data['special_requests'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        // Handle requirements upload
+        if ($request->hasFile('requirements')) {
+            foreach ($request->file('requirements') as $requirementName => $file) {
+                if ($file && $file->isValid()) {
+                    // Generate unique filename
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    
+                    // Store file
+                    $filePath = $file->storeAs('booking-requirements', $filename, 'public');
+                    
+                    // Create requirement record
+                    $booking->requirements()->create([
+                        'requirement_name' => $requirementName,
+                        'file_path' => $filePath,
+                        'original_filename' => $file->getClientOriginalName(),
+                        'file_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                }
+            }
+        }
+
+        // Clear session data
+        $request->session()->forget(['booking.step1', 'booking.step2']);
+
+        // Combine all booking data for success page
+        $bookingData = array_merge($step1Data, $step2Data);
+        $bookingData['service'] = $service;
+        $bookingData['booking'] = $booking;
 
         return view('booking.success', compact('service', 'bookingData'));
     }

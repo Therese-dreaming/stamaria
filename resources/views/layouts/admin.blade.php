@@ -76,13 +76,13 @@
                     </a>
                 </div>
                 <div class="flex items-center">
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center text-white hover:text-gray-200 focus:outline-none">
+                    <div class="relative">
+                        <button id="profileDropdownBtn" class="flex items-center text-white hover:text-gray-200 focus:outline-none">
                             <i class="fas fa-user mr-1"></i>
                             <span class="ml-1">{{ Auth::user()->name }}</span>
                             <i class="fas fa-chevron-down ml-1 text-xs"></i>
                         </button>
-                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                        <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
                             <a href="{{ route('landing') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <i class="fas fa-home mr-2"></i>View Site
                             </a>
@@ -159,9 +159,6 @@
         </main>
     </div>
 
-    <!-- Alpine.js for dropdown functionality -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    
     <script>
         // Toast Notification System
         function showToast(message, type = 'success', duration = 5000) {
@@ -240,6 +237,24 @@
         @if(session('info'))
             showToast('{{ addslashes(session('info')) }}', 'info');
         @endif
+        
+        // Profile dropdown functionality
+        const profileDropdownBtn = document.getElementById('profileDropdownBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        
+        if (profileDropdownBtn && profileDropdown) {
+            profileDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileDropdownBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        }
         
         // Mobile sidebar toggle
         document.getElementById('sidebarToggle').addEventListener('click', function() {

@@ -77,30 +77,6 @@ class Service extends Model
     }
 
     /**
-     * Get the form fields for this service
-     */
-    public function formFields()
-    {
-        return $this->hasMany(ServiceFormField::class)->orderBy('order');
-    }
-
-    /**
-     * Get required form fields
-     */
-    public function requiredFormFields()
-    {
-        return $this->formFields()->where('required', true);
-    }
-
-    /**
-     * Get conditional form fields
-     */
-    public function conditionalFormFields()
-    {
-        return $this->formFields()->where('is_conditional', true);
-    }
-
-    /**
      * Get the bookings for this service
      */
     public function bookings()
@@ -137,5 +113,4 @@ class Service extends Model
     {
         return $this->getAvailableSlots($date, $time);
     }
-
 }

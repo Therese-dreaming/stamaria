@@ -44,13 +44,13 @@
                 <div class="flex items-center space-x-4">
                     @auth
                         <!-- User Dropdown -->
-                        <div class="relative group">
-                            <button class="flex items-center text-gray-700 font-semibold focus:outline-none">
+                        <div class="relative">
+                            <button id="profileDropdownBtn" class="flex items-center text-gray-700 font-semibold focus:outline-none">
                                 <i class="fas fa-user-circle text-2xl mr-2"></i>
                                 <span class="hidden md:block">{{ Auth::user()->name }}</span>
                                 <i class="fas fa-chevron-down ml-1 text-sm"></i>
                             </button>
-                            <div class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 z-50 invisible group-hover:visible group-focus:visible">
+                            <div id="profileDropdown" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 z-50 hidden">
                                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
                                 <form method="POST" action="{{ route('logout') }}" class="block">
                                     @csrf
@@ -249,20 +249,28 @@
             showToast('{{ addslashes(session('info')) }}', 'info');
         @endif
         
+        // Profile dropdown functionality
+        const profileDropdownBtn = document.getElementById('profileDropdownBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        
+        if (profileDropdownBtn && profileDropdown) {
+            profileDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileDropdownBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
         // Mobile menu toggle
         document.getElementById('mobile-menu-button').addEventListener('click', function() {
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.toggle('hidden');
-        });
-        // Dropdown close on click outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.group');
-            if (dropdown && !dropdown.contains(event.target)) {
-                const menu = dropdown.querySelector('.group-hover\\:opacity-100');
-                if (menu) {
-                    menu.classList.remove('opacity-100', 'visible');
-                }
-            }
         });
     </script>
 

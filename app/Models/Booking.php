@@ -40,6 +40,14 @@ class Booking extends Model
     }
 
     /**
+     * Get the requirements for this booking
+     */
+    public function requirements()
+    {
+        return $this->hasMany(BookingRequirement::class);
+    }
+
+    /**
      * Get the booking datetime
      */
     public function getBookingDateTimeAttribute()

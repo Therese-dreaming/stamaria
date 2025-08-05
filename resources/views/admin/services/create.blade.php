@@ -69,7 +69,7 @@
                         </button>
                         <button type="button" id="addConditionalRequirement" 
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
-                            <i class="fas fa-question-circle mr-1"></i>Add Conditional
+                            <i class="fas fa-question-circle mr-1"></i>Add Conditional Note
                         </button>
                     </div>
                 </div>
@@ -81,13 +81,13 @@
                 <!-- Separator for conditional requirements -->
                 <div id="requirementsSeparator" class="hidden my-4 border-t border-gray-200">
                     <div class="flex items-center justify-center">
-                        <span class="bg-white px-3 text-xs text-gray-500">Conditional Requirements</span>
+                        <span class="bg-white px-3 text-xs text-gray-500">Conditional Notes</span>
                     </div>
                 </div>
                 
                 <div class="mt-2 text-sm text-gray-600">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Add specific requirements or documents needed for this service. Use conditional requirements for cases like "Marriage Certificate if parents are married, otherwise Birth Certificate".
+                    Add file upload requirements. All requirements are automatically file uploads. Use conditional notes for special instructions like "Upload Marriage Certificate if parents are married".
                 </div>
                 
                 @error('requirements')
@@ -282,6 +282,7 @@
             <input type="text" name="requirements[]" 
                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                    placeholder="e.g., Valid ID, Birth Certificate, etc.">
+            <p class="text-xs text-gray-500 mt-1">This will be a file upload field</p>
         </div>
         <button type="button" class="remove-requirement text-red-500 hover:text-red-700 p-2">
             <i class="fas fa-times"></i>
@@ -295,7 +296,7 @@
         <div class="flex items-center justify-between mb-3">
             <h6 class="text-sm font-medium text-blue-800 flex items-center">
                 <i class="fas fa-question-circle mr-2 text-blue-600"></i>
-                Conditional Requirement
+                Conditional Note
             </h6>
             <button type="button" class="remove-conditional-requirement text-red-500 hover:text-red-700">
                 <i class="fas fa-times"></i>
@@ -312,7 +313,7 @@
         
         <!-- Primary Requirement -->
         <div class="mb-3">
-            <label class="block text-xs font-medium text-blue-700 mb-1">Primary Requirement</label>
+            <label class="block text-xs font-medium text-blue-700 mb-1">File Upload Requirement</label>
             <input type="text" name="requirements[]" 
                    class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                    placeholder="e.g., Marriage Certificate">
@@ -321,7 +322,7 @@
         <!-- Alternative Requirements -->
         <div class="mb-3">
             <div class="flex items-center justify-between mb-2">
-                <label class="block text-xs font-medium text-blue-700">Alternative Requirements</label>
+                <label class="block text-xs font-medium text-blue-700">Alternative File Uploads</label>
                 <button type="button" class="add-alternative-requirement text-blue-600 hover:text-blue-800 text-xs">
                     <i class="fas fa-plus mr-1"></i>Add Alternative
                 </button>
@@ -338,7 +339,7 @@
             </div>
             <p class="text-xs text-blue-600 mt-1">
                 <i class="fas fa-info-circle mr-1"></i>
-                These requirements apply when the condition is not met
+                These file uploads apply when the condition is not met
             </p>
         </div>
     </div>

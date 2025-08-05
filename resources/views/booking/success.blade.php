@@ -88,42 +88,43 @@
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm font-medium text-gray-700">Preferred Date:</span>
-                            <p class="text-gray-900">{{ \Carbon\Carbon::parse($bookingData['preferred_date'])->format('F j, Y') }}</p>
+                            <span class="text-sm font-medium text-gray-700">Booking Date:</span>
+                            <p class="text-gray-900">{{ \Carbon\Carbon::parse($bookingData['booking_date'])->format('F j, Y') }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-medium text-gray-700">Preferred Time:</span>
-                            <p class="text-gray-900">{{ \Carbon\Carbon::parse($bookingData['preferred_time'])->format('g:i A') }}</p>
+                            <span class="text-sm font-medium text-gray-700">Booking Time:</span>
+                            <p class="text-gray-900">{{ \Carbon\Carbon::parse($bookingData['booking_time'])->format('g:i A') }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Custom Fields -->
-                @if(isset($bookingData['custom_fields']) && count($bookingData['custom_fields']) > 0)
+                <!-- Uploaded Requirements -->
+                @if(isset($bookingData['booking']) && $bookingData['booking']->requirements->count() > 0)
                     <div class="mb-6">
                         <h4 class="font-semibold text-lg mb-3 text-[#0d5c2f]">
-                            <i class="fas fa-list-alt mr-2"></i>Additional Information
+                            <i class="fas fa-file-upload mr-2"></i>Uploaded Documents
                         </h4>
                         <div class="space-y-3">
-                            @foreach($bookingData['custom_fields'] as $fieldName => $field)
-                                @if(isset($bookingData[$fieldName]) && !empty($bookingData[$fieldName]))
-                                    <div class="flex justify-between items-start">
-                                        <span class="text-sm font-medium text-gray-700">{{ $field->label }}:</span>
-                                        <div class="text-right">
-                                            @if($field->field_type === 'checkbox')
-                                                <span class="text-gray-900">{{ $bookingData[$fieldName] ? 'Yes' : 'No' }}</span>
-                                            @elseif($field->field_type === 'file')
-                                                <span class="text-gray-900">File uploaded</span>
-                                            @else
-                                                <span class="text-gray-900">{{ $bookingData[$fieldName] }}</span>
-                                            @endif
+                            @foreach($bookingData['booking']->requirements as $requirement)
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file mr-3 text-[#0d5c2f]"></i>
+                                        <div>
+                                            <p class="font-medium text-gray-900">{{ $requirement->requirement_name }}</p>
+                                            <p class="text-sm text-gray-500">{{ $requirement->original_filename }} ({{ $requirement->formatted_file_size }})</p>
                                         </div>
                                     </div>
-                                @endif
+                                    <a href="{{ $requirement->file_url }}" target="_blank" 
+                                       class="text-[#0d5c2f] hover:text-[#0d5c2f]/80 text-sm font-medium">
+                                        <i class="fas fa-download mr-1"></i>Download
+                                    </a>
+                                </div>
                             @endforeach
                         </div>
                     </div>
                 @endif
+
+
 
                 <!-- Special Requests -->
                 @if(isset($bookingData['special_requests']) && !empty($bookingData['special_requests']))

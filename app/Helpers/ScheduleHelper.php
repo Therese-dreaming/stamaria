@@ -20,26 +20,18 @@ class ScheduleHelper
         $schedules = $service->schedules ?? [];
         $availableTimes = [];
         
-        foreach ($schedules as $schedule) {
-            // Check if this schedule applies to the selected day
-            if (isset($schedule['days']) && in_array($dayOfWeek, $schedule['days'])) {
-                // Add primary time if it exists
-                if (isset($schedule['primary_time']) && !empty($schedule['primary_time'])) {
-                    $availableTimes[] = $schedule['primary_time'];
+        // Handle both array of schedules and single schedule object
+        if (!empty($schedules)) {
+            // If schedules is an array of schedule objects
+            if (is_array($schedules) && isset($schedules[0])) {
+                foreach ($schedules as $schedule) {
+                    $times = self::getTimesForSchedule($schedule, $dayOfWeek);
+                    $availableTimes = array_merge($availableTimes, $times);
                 }
-                
-                // Add additional times if they exist
-                if (isset($schedule['additional_times']) && is_array($schedule['additional_times'])) {
-                    $availableTimes = array_merge($availableTimes, $schedule['additional_times']);
-                }
-                
-                // Add day-specific times if they exist
-                if (isset($schedule['day_specific_times']) && isset($schedule['day_specific_times'][$dayOfWeek])) {
-                    $dayTimes = $schedule['day_specific_times'][$dayOfWeek];
-                    if (is_array($dayTimes)) {
-                        $availableTimes = array_merge($availableTimes, $dayTimes);
-                    }
-                }
+            } else {
+                // If schedules is a single schedule object
+                $times = self::getTimesForSchedule($schedules, $dayOfWeek);
+                $availableTimes = array_merge($availableTimes, $times);
             }
         }
         
@@ -61,6 +53,37 @@ class ScheduleHelper
         }
         
         return $filteredTimes;
+    }
+
+    /**
+     * Get available times for a specific schedule and day
+     */
+    private static function getTimesForSchedule($schedule, $dayOfWeek)
+    {
+        $times = [];
+        
+        // Check if this schedule applies to the selected day
+        if (isset($schedule['days']) && in_array($dayOfWeek, $schedule['days'])) {
+            // Add primary time if it exists
+            if (isset($schedule['primary_time']) && !empty($schedule['primary_time'])) {
+                $times[] = $schedule['primary_time'];
+            }
+            
+            // Add additional times if they exist
+            if (isset($schedule['additional_times']) && is_array($schedule['additional_times'])) {
+                $times = array_merge($times, $schedule['additional_times']);
+            }
+            
+            // Add day-specific times if they exist
+            if (isset($schedule['day_specific_times']) && isset($schedule['day_specific_times'][$dayOfWeek])) {
+                $dayTimes = $schedule['day_specific_times'][$dayOfWeek];
+                if (is_array($dayTimes)) {
+                    $times = array_merge($times, $dayTimes);
+                }
+            }
+        }
+        
+        return $times;
     }
     
     /**
@@ -130,14 +153,38 @@ class ScheduleHelper
             $dayOfWeek = strtolower($currentDate->format('l'));
             $schedules = $service->schedules ?? [];
             
-            foreach ($schedules as $schedule) {
-                if (isset($schedule['days']) && in_array($dayOfWeek, $schedule['days'])) {
-                    // Check if there are any available time slots for this date
-                    $availableTimes = self::getAvailableTimeSlots($service, $currentDate);
-                    if (!empty($availableTimes)) {
-                        $availableDates[] = $currentDate->format('Y-m-d');
-                        break; // Found at least one available time, move to next date
+            // Handle both array of schedules and single schedule object
+            if (!empty($schedules)) {
+                $hasAvailableTimes = false;
+                
+                // If schedules is an array of schedule objects
+                if (is_array($schedules) && isset($schedules[0])) {
+                    foreach ($schedules as $schedule) {
+                        if (isset($schedule['days']) && in_array($dayOfWeek, $schedule['days'])) {
+                            // Check if there are any available time slots for this date
+                            $availableTimes = self::getAvailableTimeSlots($service, $currentDate);
+                            if (!empty($availableTimes)) {
+                                $availableDates[] = $currentDate->format('Y-m-d');
+                                $hasAvailableTimes = true;
+                                break; // Found at least one available time, move to next date
+                            }
+                        }
                     }
+                } else {
+                    // If schedules is a single schedule object
+                    if (isset($schedules['days']) && in_array($dayOfWeek, $schedules['days'])) {
+                        // Check if there are any available time slots for this date
+                        $availableTimes = self::getAvailableTimeSlots($service, $currentDate);
+                        if (!empty($availableTimes)) {
+                            $availableDates[] = $currentDate->format('Y-m-d');
+                            $hasAvailableTimes = true;
+                        }
+                    }
+                }
+                
+                if ($hasAvailableTimes) {
+                    $currentDate->addDay();
+                    continue;
                 }
             }
             
